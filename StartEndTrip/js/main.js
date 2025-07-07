@@ -1,5 +1,5 @@
 import { config } from '../js/config.js';
-import { getAllStores, getAllRoutes, getAllOrders } from '../js/services.js';
+import { getAllOrders } from '../js/services.js';
 
 // var stores = []
 // var routes = []
@@ -98,7 +98,6 @@ function getOrders(){
     orders.forEach(o => {
         if (o.user.id == idUser) {
             myOrders.push(o)
-            console.log(o)
         }
     });
 }
