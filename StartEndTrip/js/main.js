@@ -1,16 +1,14 @@
 import { config } from '../js/config.js';
-import { getAllOrders } from '../js/services.js';
+import { getAllOrders, postTrip } from '../js/services.js';
 
-// var stores = []
-// var routes = []
 var orders = []
 
 var intervalSimulate = null
 var duration = 0
 var orderCounter = 0
 
+var idRoute
 var idUser = 1002
-var idTrip = 1002
 var trip = {}
 var myOrders = []
 
@@ -18,40 +16,15 @@ window.addEventListener('load', init)
 
 function init(){
     console.log('Initializing document...')
-    // setStores()
-    // setRoutes()
     setOrders()
 
     document.getElementById('trip-info').addEventListener('click', () => {
         printTrip()
     })
-    // document.getElementById('start-trip').addEventListener('click', () => {
-    //     startTrip()
-    // })
-    // document.getElementById('continue-trip').addEventListener('click', () => {
-    //     continueTrip()
-    // })
-    // document.getElementById('end-trip').addEventListener('click', () => {
-    //     endTrip()
-    // })
     document.getElementById('simulate-trip').addEventListener('click', () => {
         simulate()
     })
 }
-
-// function setStores(){
-//     getAllStores().then( (response) => {
-//         console.log(response.data)
-//         stores = response.data
-//     })
-// }
-
-// function setRoutes(){
-//     getAllRoutes().then( (response) => {
-//         console.log(response.data)
-//         routes = response.data
-//     })
-// }
 
 function setOrders(){
     getAllOrders().then( (response) => {
@@ -60,12 +33,18 @@ function setOrders(){
     })
 }
 
+function setRoute(){
+    idRoute = document.getElementById('route-id').value
+    console.log(idRoute)
+}
+
 
 function printTrip(){
     console.log(trip)
 }
 
 function simulate(){
+    setRoute()
     createTrip()
     getOrders()
     startTrip()
@@ -81,16 +60,15 @@ function randomDuration(){
 
 function createTrip(){
     console.log('Viaje Empezado')
-
-    trip = {
-        date: new Date(),
-        start_hour: new Date(),
-        end_hour: '',
-        total_time: '',
-        IDRoute: idTrip,
-        orders: [],
-        IDStateTrip: 0
+    if (idRoute != null) {
+            postTrip(idRoute)
+            postTrip(idRoute).then( (response) => {
+            console.log(response.data)
+            trip = response.data
+        })
     }
+    else
+        console.log('Route ID is missing')
 }
 
 function getOrders(){
@@ -145,6 +123,7 @@ function endTrip(){
     console.log('Viaje terminado en ' + (trip.total_time/1000).toFixed(0) + " segundos.")
     
     console.log(trip)
+    //postTrip(trip)
 }
 
 function nextStore(){
