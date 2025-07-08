@@ -1,21 +1,21 @@
-import { config } from '../js/config.js';
-import { getAllOrders, postTrip } from '../js/services.js';
-
-var orders = []
+import { getAllOrders, postStartTrip, postEndTrip, postStartOrder, postEndOrder } from '../js/services.js';
 
 var intervalSimulate = null
 var duration = 0
 var orderCounter = 0
 
 var idRoute
-var idUser = 1002
-var trip = {}
+var idUser
+var trip
+var orders = []
 var myOrders = []
+var traveling = false
 
 window.addEventListener('load', init)
 
 function init(){
     console.log('Initializing document...')
+    //Trae todas las ordenes de la DB
     setOrders()
 
     document.getElementById('trip-info').addEventListener('click', () => {
@@ -26,30 +26,29 @@ function init(){
     })
 }
 
+//Setup
 function setOrders(){
-    getAllOrders().then( (response) => {
-        console.log(response.data)
-        orders = response.data
-    })
+    getAllOrders().then( (response) => {orders = response.data})
 }
-
 function setRoute(){
     idRoute = document.getElementById('route-id').value
-    console.log(idRoute)
 }
-
-
+function setUser(){
+    idUser = document.getElementById('user-id').value
+}
 function printTrip(){
     console.log(trip)
 }
 
-function simulate(){
+async function simulate(){
     setRoute()
-    createTrip()
+    setUser()
+
+    await startTrip()
     getOrders()
-    startTrip()
-    randomDuration()
-    intervalSimulate = setInterval(continueTrip, duration)
+    await endOrder(trip.id, trip.orders[0].idOrder)
+
+    time()
 }
 
 function randomDuration(){
@@ -58,13 +57,14 @@ function randomDuration(){
         randomDuration()
 }
 
-function createTrip(){
+async function startTrip(){
     console.log('Viaje Empezado')
     if (idRoute != null) {
-            postTrip(idRoute)
-            postTrip(idRoute).then( (response) => {
-            console.log(response.data)
-            trip = response.data
+            await postStartTrip(idRoute).
+                then( (response) => {
+                    trip = response.data
+                    trip.startHour = new Date()
+                    console.log(trip)
         })
     }
     else
@@ -74,61 +74,58 @@ function createTrip(){
 function getOrders(){
     //Guardar las ordenes para el conductor
     orders.forEach(o => {
-        if (o.user.id == idUser) {
+        if (o.createdBy.id == idUser) {
             myOrders.push(o)
         }
     });
 }
 
-function startTrip(){
-    trip.orders.push({
-        IDOrder: myOrders[orderCounter].id,
-        IDStore: myOrders[orderCounter].store.id,
-        time_start: new Date(),
-        time_end: ''
-    })
-
-    console.log('Rumbo a ' + nextStore() )
+async function endOrder(tripId, orderId){
+    await postEndOrder(tripId, orderId)
+        .then((response) => { console.log(response) })
 }
 
-function continueTrip(){
-    trip.orders[orderCounter].time_end = new Date()
-    console.log('Viaje a ' +  nextStore() + ' terminado en ' + duration/1000 + ' segundos')
-    orderCounter++
-    if (orderCounter < myOrders.length) {
-        trip.orders.push({
-            IDOrder: orders[orderCounter].id,
-            IDStore: orders[orderCounter].store.id,
-            time_start: new Date(),
-            time_end: ''
-        })
-        
-        console.log('Rumbo a ' + nextStore() )
+async function startOrder(tripId, orderId){
+    await postStartOrder(tripId, orderId)
+        .then((response) => { console.log(response) })
+}
 
-        clearInterval(intervalSimulate)
-        randomDuration()
-        intervalSimulate = setInterval(continueTrip, duration)
+async function travel(){
+    traveling = !traveling
+
+    if (orderCounter < myOrders.length) {
+        if (traveling) {
+            await startOrder(trip.id, myOrders[orderCounter].id)
+            console.log('Rumbo a ' + myOrders[orderCounter].store.name)
+            
+            time()
+        }
+        else{
+            await endOrder(trip.id, myOrders[orderCounter].id)
+            orderCounter++
+            
+            travel()
+        }
     }
     else{
         endTrip()
         clearInterval(intervalSimulate)
     }
-
 }
 
-function endTrip(){
-    trip.end_hour = new Date()
-    trip.total_time = trip.end_hour - trip.start_hour
-    trip.IDStateTrip = 1
-    console.log('Viaje terminado en ' + (trip.total_time/1000).toFixed(0) + " segundos.")
-    
+function time(){
+    clearInterval(intervalSimulate)
+    randomDuration()
+    intervalSimulate = setInterval(travel, duration)
+}
+
+async function endTrip(){
+    await postEndTrip(trip.id)
+        .then( (response) => {
+            console.log(response)
+            trip.end_hour = new Date()
+            trip.total_time = trip.end_hour - trip.startHour
+        })
     console.log(trip)
-    //postTrip(trip)
+    console.log('Viaje terminado en ' + (trip.total_time/1000).toFixed(0) + " segundos.")      
 }
-
-function nextStore(){
-    return myOrders[orderCounter].store.name
-}
-
-
-
