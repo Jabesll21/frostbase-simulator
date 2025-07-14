@@ -24,10 +24,13 @@ async function generarPedido() {
 
     //console.log(store)
 
-    if (checkStoreOrdered(store.id) == 1) {
-        storeList.splice(index, 1);
-        return;
-    }
+    await checkStoreOrdered(store.id).then((response) =>{
+        if (response.status == 1) {
+            console.log(store.name + " ya tiene pedido pendiente")
+            storeList.splice(index, 1);
+            return;
+        }
+    })
 
     const pedido = {
         idCreatedByUser: adminId,

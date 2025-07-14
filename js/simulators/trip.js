@@ -1,4 +1,4 @@
-import { getAllOrders, postStartTrip, postEndTrip, postStartOrder, postEndOrder } from '../js/services.js';
+import { getAllOrders, postStartTrip, postEndTrip, postStartOrder, postEndOrder } from '../services.js';
 
 var intervalSimulate = null
 var duration = 0
@@ -11,25 +11,15 @@ var orders = []
 var myOrders = []
 var traveling = false
 
-window.addEventListener('load', init)
-
 function init(){
-    console.log('Initializing document...')
+    console.log('Initializing trip simulation...')
     //Trae todas las ordenes de la DB
-    setOrders()
-
-    document.getElementById('trip-info').addEventListener('click', () => {
-        printTrip()
-    })
-    document.getElementById('simulate-trip').addEventListener('click', () => {
+    getAllOrders().then( (response) => {
+        orders = response.data},
         simulate()
-    })
+    )
 }
 
-//Setup
-function setOrders(){
-    getAllOrders().then( (response) => {orders = response.data})
-}
 function setRoute(){
     idRoute = document.getElementById('route-id').value
 }
