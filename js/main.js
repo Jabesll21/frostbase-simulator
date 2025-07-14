@@ -1,3 +1,5 @@
+import { start as initOrders } from "./simulators/order.js"
+
 var orderSim = false;
 var tripSim = false;
 var readingSim = false;
@@ -58,7 +60,8 @@ function checkSim(){
 }
 
 async function startOrders(){
-    console.log("Orders simulator...")
+    console.log("Orders simulator...");
+    initOrders();
 }
 async function stopOrders(){
     console.log("Stoping Orders...")
