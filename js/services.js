@@ -1,5 +1,16 @@
 import { config } from '../js/config.js';
 
+//generate order
+export async function generateOrder(){
+    //url
+    var url = config.api.simulator + "order/generate";
+    console.log(url);
+    //fetch
+    return await fetch(url, { method: 'post' })
+        .then( (result) => { return result.json(); })
+        .catch( (error) => { console.error(error) })
+}
+
 //get orders
 export async function getAllOrders(){
     //url
