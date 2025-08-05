@@ -1,83 +1,53 @@
-import { start as initOrders } from "./simulators/order.js"
+import { generateOrders, generateTrips, checkTrips } from './services.js';
 
-var orderSim = false;
-var tripSim = false;
-var readingSim = false;
+let checkInterval = null;
+const intervalTime = 10000; // 10 segundos
 
-window.addEventListener('load', init)
+window.addEventListener('load', init);
 
-function init(){
-    console.log('Initializing document...')
-    document.getElementById('start').addEventListener('click', () => {
-        orderSim = true;
-        tripSim = true;
-        readingSim = true;
-        console.log("-- Starting all --")
-        checkSim()
-    })
-    document.getElementById('stop').addEventListener('click', () => {
-        orderSim = false;
-        tripSim = false;
-        readingSim = false;
-        console.log("-- Stopping all --")
-        checkSim()
-    })
-    document.getElementById('start-order').addEventListener('click', () => {
-        orderSim = true;
-        startOrders();
-    })
-    document.getElementById('stop-order').addEventListener('click', () => {
-        orderSim = false;
-        stopOrders();
-    })
+function init() {
+    console.log('Initializing document...');
+    // Set default date as today in yyyy-MM-dd format
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
 
-    document.getElementById('start-trip').addEventListener('click', () => {
-        tripSim = true;
-        startTrips();
-    })
-    document.getElementById('stop-trip').addEventListener('click', () => {
-        tripSim = false;
-        stopTrips();
-    })
-
-    document.getElementById('start-reading').addEventListener('click', () => {
-        readingSim = true;
-        startReadings();
-    })
-    document.getElementById('stop-reading').addEventListener('click', () => {
-        readingSim = false;
-        stopReadings();
-    })
+    document.getElementById('start-order').addEventListener('click', startOrders);
+    document.getElementById('start-trip').addEventListener('click', startTrips);
+    document.getElementById('start-check').addEventListener('click', startCheckTrips);
+    document.getElementById('stop-check').addEventListener('click', stopCheckTrips);
 }
 
-function checkSim(){
-    if(orderSim) startOrders();
-    else stopOrders();
-    if(tripSim) startTrips();
-    else stopTrips();
-    if(readingSim) startReadings();
-    else stopReadings();
+async function startOrders() {
+    const date = document.getElementById('date').value;
+    if (!date) return alert('Selecciona una fecha');
+    const res = await generateOrders(date);
+    console.log('Orders generated:', res);
 }
 
-async function startOrders(){
-    console.log("Orders simulator...");
-    initOrders();
-}
-async function stopOrders(){
-    console.log("Stoping Orders...")
-}
-async function startTrips(){
-    console.log("Trips simulator...")
-    
-}
-async function stopTrips(){
-    console.log("Stoping Trips...")
+async function startTrips() {
+    const date = document.getElementById('date').value;
+    if (!date) return alert('Selecciona una fecha');
+    const res = await generateTrips(date);
+    console.log('Trips generated:', res);
 }
 
-async function startReadings(){
-    console.log("Readings simulator...")
+function startCheckTrips() {
+    if (checkInterval) return;
+    checkInterval = setInterval(async () => {
+        const res = await checkTrips();
+        console.log('Check trips:', res);
+    }, intervalTime);
+    console.log('Check trips iniciado');
+    checkTrips();
 }
 
-async function stopReadings(){
-    console.log("Stoping Readings...")
+function stopCheckTrips() {
+    if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+        console.log('Check trips detenido');
+    }
 }
