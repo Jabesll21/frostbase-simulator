@@ -1,5 +1,18 @@
 import { config } from '../js/config.js';
+import { formatDate } from "./main.js";
 
+//generate order
+export async function simulateByDateRange(start, end){
+    //url
+    var url = config.api.url + "generate/"+start+"&"+end;
+    console.log(url);
+    //fetch
+    return await fetch(url, {
+        method: 'post'
+    })
+    .then( (result) => { return result.json(); })
+    .catch( (error) => { console.error(error) })
+}
 //generate order
 export async function generateOrders(date){
     //url
