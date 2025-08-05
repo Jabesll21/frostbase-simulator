@@ -9,14 +9,32 @@
 <body>
     <h1>Frostbase simulator</h1>
     <hr>
-    <label for="date">Date:</label>
-    <input id="date" type="date" ></input>
+    
+    <h2>Check</h2>
+    <button id="start-check" style="border-color: #eee;">Start check</button>
+    <button id="stop-check" style="border-color: #eee;"">Stop check</button>
+    
+    <hr>
+    
     <h2>Order Simulator</h2>
+    <label for="order-date">Date:</label>
+    <input id="order-date" type="date" ></input>
     <button id="start-order">Generate orders</button>
+    
     <h2>Trip Simulator</h2>
+    <label for="trip-date">Date:</label>
+    <input id="trip-date" type="date" ></input>
     <button id="start-trip">Generate trips</button>
-    <h2>Check Trips</h2>
-    <button id="start-check">Start check</button>
-    <button id="stop-check">Stop check</button>
+    
+    <hr>
+
+    <h2>Simulate all</h2>
+    <label for="start-date">Start Date:</label>
+    <input id="start-date" type="date" ></input>
+    <br>
+    <label for="end-date">End Date:</label>
+    <input id="end-date" type="date" ></input>
+    <br>
+    <button id="start-simulate">Generate</button>
 </body>
 </html>
